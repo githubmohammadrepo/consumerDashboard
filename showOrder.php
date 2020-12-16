@@ -215,6 +215,7 @@ $document->addScriptDeclaration($script);
   // new orders
   function newOrders(type) {
     hide('.done')
+    hide('.archive')
     show('.proposal')
 
   }
@@ -222,11 +223,13 @@ $document->addScriptDeclaration($script);
   function allOrders(type) {
     show('.done')
     show('.proposal')
+    hide('.archive')
   }
 
   //done orders
   function doneOrders(type) {
     hide('.proposal')
+    hide('.archive')
     show('.done')
   }
   //archvie orders
@@ -234,6 +237,7 @@ $document->addScriptDeclaration($script);
     //hide all other rows
     hide('.done')
     hide('.proposal')
+    show('.archive')
 
     //get all archive records
     getAllArchiveOrders();
@@ -279,14 +283,15 @@ $document->addScriptDeclaration($script);
       success: function(data) {
         console.log(data)
         if (data[0].response == 'ok') {
-
+          //remove all row before
+          jQuery('.archive').remove();
           //get order
           let insertRows = '';
           let valueTwoCup = 0;
           data[0].data.forEach(function(value, key) {
             let orderId = 'order' + (key + 1) +fastHashParams(randomChar());
             insertRows += "<tr id='" +orderId+
-              "' class='orderHeader " + Object.keys(value)[0] +
+              "' class='orderHeader archive none" + Object.keys(value)[0] +
               "' onclick='toggleOrder("+'"'+orderId+'"'+")'"
                +"style='color:white;background-color:#34568B;'>";
             insertRows += "<td>" + (key + 1) +
@@ -310,7 +315,7 @@ $document->addScriptDeclaration($script);
 
                 valueTwoCup = valueTwo.length
                 insertRows += "<tr  class='" + orderId +
-                  " orderHeader none' id='" +storeId+"'"+
+                  " orderHeader archive none' id='" +storeId+"'"+
                   "' onclick='toggleStore("+'"'+storeId+'"'+")'"+
                   " style='color:white;background-color:#1c53a5'>";
                 insertRows += "<td>" + (keyTwo) +
@@ -326,7 +331,7 @@ $document->addScriptDeclaration($script);
                 insertRows = ''
                 Object.keys(value[valueOne]).forEach(function(valueThree, keyThree) {
                   insertRows += "<tr  class='"+storeId+
-                    " orderHeader none' id='product" + valueThree['product_id'] +
+                    " orderHeader archive none' id='product" + valueThree['product_id'] +
                     "' style='color:white;background-color:#554884 !important'>";
                   insertRows += "<td>" + valueThree['id'] +
                     "</td>";
