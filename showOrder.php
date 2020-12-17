@@ -32,7 +32,9 @@ $style = <<<Demo
     color:white !important;
   }
 
-  
+  tr th {
+    text-align: center;
+  }
   
 Demo;
 $document->addStyleDeclaration($style);
@@ -99,7 +101,7 @@ if (!$error) {
         <thead>
           <tr>
             <th scope="col">شماره سفارش</th>
-            <th scope="col">نام محصول</th>
+            <th scope="col">تعداد پیشنهاد</th>
             <th scope="col">تعداد محصول</th>
             <th scope="col">عملیات سفارش</th>
             <th scope="col">بایگانی</th>
@@ -108,33 +110,70 @@ if (!$error) {
         <tbody class="text-light">
           <?php
           //get order
+
           foreach ($result[0]['data'] as $key => $value) {
-            echo "<tr id='order" . ($key + 1) . "' class='orderHeader " . array_keys($value)[0] . "' onclick='toggleOrder(" . '"order' . ($key + 1) . '"' . ")' style='color:white;background-color:#34568B;'>";
+            $order_id_finded = (array_values((array_values($value)[0]))[0])[0]['order_id'];
+            echo "<tr id='order" . ($key + 1) . "' class='orderHeader orderId".$order_id_finded." " . array_keys($value)[0] . "' onclick='toggleOrder(" . '"order' . ($key + 1) . '"' . ")' style='color:white;background-color:#34568B;'>";
             echo "<td>" . ($key + 1) . "</td>";
-            echo "<td>one</td>";
-            echo "<td>" . count($valueTwo) . "</td>";
+            echo "<td>" . count(array_values($value)[0]) . "</td>";
+            echo "<td>" . count(array_values((array_values($value)[0]))[0]) . "</td>";
 
             //get order status
             foreach ($value as $keyOne => $valueOne) {
-              echo "<td>$keyOne</td>";
-              echo "<td>four</td>";
+              if($keyOne=='done'){
+                echo "<td>انجام شده</td>";
+              }else if($keyOne=='proposal'){
+                echo "<td>پیشنهاد شده</td>";
+              }else{
+                echo "<td>خطا</td>";
+              }
+              echo "<td><button type='button' class='archiveOrder btn btn-warning btn-sm'  onclick='setArchiveOrder(this,event,".$order_id_finded.")'>بایگانی</button></td>";
               echo "</tr>";
               //get vendor id
+              echo "<tr  class='order" . ($key + 1) . " orderId".$order_id_finded." child-".array_keys($value)[0]." none' style='color:white;background-color:#1C53A5 !important'>
+                <th scope='col'>کد فروشگاه</th>
+                <th scope='col'>نام فروشگاه</th>
+                <th scope='col'>تعداد محصول</th>
+                <th scope='col'>عملیات سفارش</th>
+                <th scope='col'>قیمت کل </th>
+              </tr>";
               foreach ($valueOne as $keyTwo => $valueTwo) {
-                echo "<tr  class='order" . ($key + 1) . " orderHeader none' id='store" . ($keyTwo) . 'id' . ($key + 1) . "' onclick='toggleStore(" . '"store' . ($keyTwo) . 'id' . ($key + 1) . '"' . ")' style='color:white;background-color:#1c53a5'>";
+                echo "<tr  class='order" . ($key + 1) . " orderHeader orderId".$order_id_finded." child-".array_keys($value)[0]." none' id='store" . ($keyTwo) . 'id' . ($key + 1) . "' onclick='toggleStore(" . '"store' . ($keyTwo) . 'id' . ($key + 1) . '"' . ")' style='color:white;background-color:#1c53a5'>";
                 echo "<td>" . ($keyTwo) . "</td>";
                 echo "<td>فروشگاه $keyTwo</td>";
                 echo "<td>" . count($valueTwo) . "</td>";
-                echo "<td>$keyOne</td>";
-                echo "<td>four</td>";
+                if($keyOne=='done'){
+                  echo "<td>انجام شده</td>";
+                }elseif($valueOne[$keyTwo][0]['proposal_completed']==-1){
+                  echo "<td>رد شد</td>";
+                }else if($keyOne=='proposal'){
+                  echo '<td>';
+                    echo "<button type='button' class='acceptOrder btn btn-success btn-sm'  onclick='setAcceptOrder(this,event,".$order_id_finded.",".$keyTwo.")'>قبول</button>";
+                    echo "<button type='button' class='rejectOrder btn btn-danger btn-sm'  onclick='setRejectOrder(this,event,".$order_id_finded.",".$keyTwo.")'>رد</button>";
+                  echo '</td>';
+                }else{
+                  echo "<td>خطا</td>";
+                }
+                echo "<td>".(array_sum(array_column(array_values($valueTwo),'order_product_price')))."</td>";
                 echo "</tr>";
                 //show one product order
+                
                 foreach ($valueTwo as $keyThree => $valueThree) {
-                  echo "<tr  class='store" . ($keyTwo) . 'id' . ($key + 1) . " orderHeader none' id='product" . $valueThree['product_id'] . "' style='color:white;background-color:#554884 !important'>";
+                  if($keyThree==0){
+                    echo "<tr  class='store" . ($keyTwo) . 'id' . ($key + 1) . " orderId".$order_id_finded." child-".array_keys($value)[0]." none' style='color:white;background-color:#554884 !important'>
+                      <th scope='col'>کد محصول</th>
+                      <th scope='col'>نام محصول</th>
+                      <th scope='col'>تعداد محصول</th>
+                      <th scope='col'>قیمت محصول</th>
+                      <th scope='col'>صحبت کردن</th>
+                    </tr>";
+                  }
+                  
+                  echo "<tr  class='store" . ($keyTwo) . 'id' . ($key + 1) . " orderHeader orderId".$order_id_finded." child-".array_keys($value)[0]." none' id='product" . $valueThree['product_id'] . "' style='color:white;background-color:#554884 !important'>";
                   echo "<td>" . $valueThree['id'] . "</td>";
                   echo "<td>" . $valueThree['order_product_name'] . "</td>";
                   echo "<td>" . $valueThree['order_product_quantity'] . "</td>";
-                  echo "<td>عملیات سفارش</td>";
+                  echo "<td> ".$valueThree['order_product_price']." </td>";
                   echo "<td>باگیانی</td>";
                   echo "</tr>";
                 }
@@ -190,6 +229,7 @@ $document->addScriptDeclaration($script);
 ?>
 
 <script>
+  var buyStatusGlobal = '';
   function filterShowOrders(event, button, type) {
     event.preventDefault();
     //remove class in all li
@@ -214,29 +254,33 @@ $document->addScriptDeclaration($script);
 
   // new orders
   function newOrders(type) {
-    hide('.done')
-    hide('.archive')
+    hideAll();
+    // hide('.done')
+    // hide('.archive')
     show('.proposal')
 
   }
   // all orders
   function allOrders(type) {
+    hideAll();
     show('.done')
     show('.proposal')
-    hide('.archive')
+    // hide('.archive')
   }
 
   //done orders
   function doneOrders(type) {
-    hide('.proposal')
-    hide('.archive')
+    hideAll();
+    // hide('.proposal')
+    // hide('.archive')
     show('.done')
   }
   //archvie orders
   function archiveOrders(type) {
+    hideAll()
     //hide all other rows
-    hide('.done')
-    hide('.proposal')
+    // hide('.done')
+    // hide('.proposal')
     show('.archive')
 
     //get all archive records
@@ -253,6 +297,8 @@ $document->addScriptDeclaration($script);
       } else {
         el.classList.add('none')
       }
+      //hide cild-ClassName too
+      hide('.child-'+className.replace(".", ""))
     })
   }
 
@@ -267,6 +313,11 @@ $document->addScriptDeclaration($script);
     })
   }
 
+  function hideAll(){
+    hide('.done')
+    hide('.proposal')
+    hide('.archive')
+  }
   //get all archive order records
   function getAllArchiveOrders() {
     var data = {
@@ -289,7 +340,7 @@ $document->addScriptDeclaration($script);
           let insertRows = '';
           let valueTwoCup = 0;
           data[0].data.forEach(function(value, key) {
-            let orderId = 'order' + (key + 1) +fastHashParams(randomChar());
+            var orderId = 'order' + (key + 1) +fastHashParams(randomChar());
             insertRows += "<tr id='" +orderId+
               "' class='orderHeader archive none" + Object.keys(value)[0] +
               "' onclick='toggleOrder("+'"'+orderId+'"'+")'"
@@ -355,7 +406,7 @@ $document->addScriptDeclaration($script);
       },
       error: function(xhr) {
         console.log('error', xhr);
-        notificationDisplay(tdsClassName, 'خطا در اینترنت', 'red', 'white')
+        
       }
     })
   }
@@ -390,5 +441,110 @@ function fastHashParams() {
 function randomChar(){
   return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 15)+'mwfji'+Math.random()*100+
   Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 15)+'mwfji';
+}
+
+
+/**set archive order */
+function setArchiveOrder(button,event,order_id){
+  var data = {
+    user_id: <?php echo JFactory::getUser()->id; ?>,
+    type: "archiveOrder",
+    order_id:order_id
+  }
+  // sent ajax request
+  jQuery.ajax({
+      url: "http://hypertester.ir/serverHypernetShowUnion/changeConsumerOrderStatus.php",
+      method: "POST",
+      data: JSON.stringify(data),
+      dataType: "json",
+      contentType: "application/json",
+      success: function(data) {
+        console.log(data)
+        if (data[0].response == 'ok') {
+          //remove all row before
+          alert(order_id)
+          jQuery('.orderId'+order_id).remove();
+          //get order
+          
+        } else {
+          console.log('no')
+          console.log(data)
+        }
+      },
+      error: function(xhr) {
+        console.log('error', xhr);
+        
+      }
+    })
+}
+
+/**set accept order */
+function setAcceptOrder(button,event,order_id,vendor_id){
+  var data = {
+    user_id: <?php echo JFactory::getUser()->id; ?>,
+    type: "acceptOrder",
+    order_id:order_id,
+    vendor_id:vendor_id
+  }
+  // sent ajax request
+  jQuery.ajax({
+      url: "http://hypertester.ir/serverHypernetShowUnion/changeConsumerOrderStatus.php",
+      method: "POST",
+      data: JSON.stringify(data),
+      dataType: "json",
+      contentType: "application/json",
+      success: function(data) {
+        console.log(data)
+        if (data[0].response == 'ok') {
+          //remove all row before
+          alert(order_id)
+          jQuery(button).parent().html('انجام شد')
+          //get order
+          
+        } else {
+          console.log('no')
+          console.log(data)
+        }
+      },
+      error: function(xhr) {
+        console.log('error', xhr);
+        
+      }
+    })
+}
+
+/**set reject order */
+function setRejectOrder(button,event,order_id,vendor_id){
+  var data = {
+    user_id: <?php echo JFactory::getUser()->id; ?>,
+    type: "rejectOrder",
+    order_id:order_id,
+    vendor_id:vendor_id
+  }
+  // sent ajax request
+  jQuery.ajax({
+      url: "http://hypertester.ir/serverHypernetShowUnion/changeConsumerOrderStatus.php",
+      method: "POST",
+      data: JSON.stringify(data),
+      dataType: "json",
+      contentType: "application/json",
+      success: function(data) {
+        console.log(data)
+        if (data[0].response == 'ok') {
+          //remove all row before
+          alert(order_id)
+          jQuery(button).parent().html('رد شد')
+          //get order
+          
+        } else {
+          console.log('no')
+          console.log(data)
+        }
+      },
+      error: function(xhr) {
+        console.log('error', xhr);
+        
+      }
+    })
 }
 </script>

@@ -78,7 +78,7 @@ class CustomerOrders
     INNER JOIN pish_hikashop_order_product ON pish_customer_vendor.order_id = pish_hikashop_order_product.order_id
     AND pish_customer_vendor.vendor_id = pish_hikashop_order_product.vendor_id_accepted
     WHERE pish_customer_vendor.buy_status = 'done' 
-    AND pish_customer_vendor.archive IS NULL
+    AND pish_customer_vendor.customer_archived IS NULL
     AND pish_customer_vendor.customer_id = ( 
     SELECT  `user_id`
     FROM pish_hikashop_user
@@ -101,7 +101,7 @@ class CustomerOrders
     ON pish_customer_vendor.order_id = proposal_order_product.order_id
     AND pish_customer_vendor.vendor_id = proposal_order_product.vendor_id_accepted
     WHERE pish_customer_vendor.buy_status = 'proposal' 
-    AND pish_customer_vendor.archive IS NULL
+    AND pish_customer_vendor.customer_archived IS NULL
     AND pish_customer_vendor.customer_id = ( 
     SELECT  `user_id`
     FROM pish_hikashop_user
@@ -177,7 +177,7 @@ class CustomerOrders
     INNER JOIN pish_hikashop_order_product ON pish_customer_vendor.order_id = pish_hikashop_order_product.order_id
     AND pish_customer_vendor.vendor_id = pish_hikashop_order_product.vendor_id_accepted
     WHERE pish_customer_vendor.buy_status = 'done' 
-    AND pish_customer_vendor.archive IS NOT NULL  
+    AND pish_customer_vendor.customer_archived IS NOT NULL  
     AND pish_customer_vendor.customer_id = ( 
     SELECT  `user_id`
     FROM pish_hikashop_user
@@ -200,7 +200,7 @@ class CustomerOrders
     ON pish_customer_vendor.order_id = proposal_order_product.order_id
     AND pish_customer_vendor.vendor_id = proposal_order_product.vendor_id_accepted
     WHERE pish_customer_vendor.buy_status = 'proposal' 
-    AND pish_customer_vendor.archive IS NOT NULL 
+    AND pish_customer_vendor.customer_archived IS NOT NULL 
     AND pish_customer_vendor.customer_id = ( 
     SELECT  `user_id`
     FROM pish_hikashop_user
