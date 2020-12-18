@@ -89,6 +89,9 @@ $document->addScriptDeclaration($script);
 // 
 ?>
 <script defer>
+/**
+ * this script in javascript make search module to top on slider
+ */
  let element = document.querySelector('#offlajn-ajax-search299')
  let bodyRect = document.body.getBoundingClientRect();
  let elemRect = element.getBoundingClientRect();

@@ -114,7 +114,7 @@ if (!$error) {
           foreach ($result[0]['data'] as $key => $value) {
             $order_id_finded = (array_values((array_values($value)[0]))[0])[0]['order_id'];
             echo "<tr id='order" . ($key + 1) . "' class='orderHeader orderId" . $order_id_finded . " " . array_keys($value)[0] . "' onclick='toggleOrder(" . '"order' . ($key + 1) . '"' . ")' style='color:white;background-color:#34568B;'>";
-            echo "<td>" . ($key + 1) . "</td>";
+            echo "<td>" . $order_id_finded . "</td>";
             echo "<td>" . count(array_values($value)[0]) . "</td>";
             echo "<td>" . count(array_values((array_values($value)[0]))[0]) . "</td>";
 
@@ -154,7 +154,10 @@ if (!$error) {
                 } else {
                   echo "<td>خطا</td>";
                 }
-                echo "<td>" . (array_sum(array_column(array_values($valueTwo), 'order_product_price'))) . "</td>";
+                // echo "<td>" . (array_sum(array_column(array_values($valueTwo), 'order_product_price'))) . "</td>";
+                echo "<td>" . (array_sum(array_map(function($element){
+                  return (($element['order_product_price'] - $element['order_product_tax'])) * $element['order_product_quantity'];
+                },array_values($valueTwo)))) . "</td>";
                 echo "</tr>";
                 //show one product order
 
@@ -165,7 +168,7 @@ if (!$error) {
                       <th scope='col'>نام محصول</th>
                       <th scope='col'>تعداد محصول</th>
                       <th scope='col'>قیمت محصول</th>
-                      <th scope='col'>صحبت کردن</th>
+                      <th scope='col'>تخفیف</th>
                     </tr>";
                   }
 
@@ -397,7 +400,7 @@ $document->addScriptDeclaration($script);
                 // insert header section end
                 let prices = value[valueOne][valueTwo];
                 let newPrice = prices.map(function(v,index){
-                  return ((parseFloat(v.order_product_price))+(parseFloat(v.order_product_tax)* parseFloat(v.order_product_price)* parseFloat(v.order_product_quantity)))
+                  return ((parseFloat(v.order_product_price) - parseFloat(v.order_product_tax)) * parseFloat(v.order_product_quantity))
                 }).reduce(function(sum,cvalue){
                   return sum + cvalue;
                 });
