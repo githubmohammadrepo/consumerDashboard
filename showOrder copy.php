@@ -352,7 +352,7 @@ $document->addScriptDeclaration($script);
               "style='color:white;background-color:#34568B;'>";
             insertRows += "<td>" + (key + 1) +
               "</td>";
-            insertRows += "<td>"+value.length+"</td>";
+            insertRows += "<td>"+count(array_values($value)[0])+"</td>";
             insertRows += "<td>" + (valueTwoCup) +
               "</td>";
 
