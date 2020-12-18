@@ -140,7 +140,7 @@ if (!$error) {
               foreach ($valueOne as $keyTwo => $valueTwo) {
                 echo "<tr  class='order" . ($key + 1) . " orderHeader orderId" . $order_id_finded . " child-" . array_keys($value)[0] . " none' id='store" . ($keyTwo) . 'id' . ($key + 1) . "' onclick='toggleStore(" . '"store' . ($keyTwo) . 'id' . ($key + 1) . '"' . ")' style='color:white;background-color:#1c53a5'>";
                 echo "<td>" . ($keyTwo) . "</td>";
-                echo "<td>فروشگاه $keyTwo</td>";
+                echo "<td> ".array_values($valueOne[$keyTwo])[0]['ShopName']."</td>";
                 echo "<td>" . count($valueTwo) . "</td>";
                 if ($keyOne == 'done') {
                   echo "<td>انجام شده</td>";
@@ -168,7 +168,7 @@ if (!$error) {
                       <th scope='col'>نام محصول</th>
                       <th scope='col'>تعداد محصول</th>
                       <th scope='col'>قیمت محصول</th>
-                      <th scope='col'>تخفیف</th>
+                      <th scope='col'>صحبت کردن</th>
                     </tr>";
                   }
 
