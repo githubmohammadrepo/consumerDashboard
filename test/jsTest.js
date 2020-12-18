@@ -275,17 +275,20 @@ data[0].data.forEach(function(value,key) {
   insertRows+="<td>one</td>";
   insertRows+="<td>"+(valueTwoCup)+
   "</td>";
-
   //get order status
-
+  
   Object.keys(value).forEach(function(valueOne,keyOne){
+    console.log('key')
+    console.log(keyOne)
+  
+    console.log('value')
+    // [Object.keys(value[valueOne])[0]]
+    console.log(value[valueOne][Object.keys(value[valueOne])[0]][0]['order_id'])
     insertRows+="<td>keyOne</td>";
     insertRows+="<td>four</td>";
     insertRows+="</tr>";
     //get vendor id
 
-    appendArchivedOrders(insertRows);
-    insertRows = ''
     // complet
     Object.keys(value[valueOne]).forEach(function(valueTwo,keyTwo) {
       valueTwoCup=valueTwo.length
@@ -306,8 +309,6 @@ data[0].data.forEach(function(value,key) {
       insertRows+="<td>four</td>";
       insertRows+="</tr>";
       //show one product order
-      appendArchivedOrders(insertRows);
-      insertRows = ''
       Object.keys(value[valueOne]).forEach(function(valueThree,keyThree) {
         insertRows+="<tr  class='store"+(keyTwo)+
         'id'+(key + 1)+
@@ -322,8 +323,6 @@ data[0].data.forEach(function(value,key) {
         insertRows+="<td>عملیات سفارش</td>";
         insertRows+="<td>باگیانی</td>";
         insertRows+="</tr>";
-        appendArchivedOrders(insertRows);
-        insertRows = ''
       })
     })
   })

@@ -337,7 +337,6 @@ $document->addScriptDeclaration($script);
       dataType: "json",
       contentType: "application/json",
       success: function(data) {
-        console.log(data)
         if (data[0].response == 'ok') {
           //remove all row before
           jQuery('.archive').remove();
@@ -352,15 +351,15 @@ $document->addScriptDeclaration($script);
               "style='color:white;background-color:#34568B;'>";
             insertRows += "<td>" + (key + 1) +
               "</td>";
-            insertRows += "<td>"+value.length+"</td>";
-            insertRows += "<td>" + (valueTwoCup) +
-              "</td>";
-
+            insertRows += "<td>"+Object.keys(value[Object.keys(value)]).length+"</td>";
+            
             //get order status
-
+            
             Object.keys(value).forEach(function(valueOne, keyOne) {
-              insertRows += "<td>keyOne</td>";
-              insertRows += "<td>four</td>";
+              
+              insertRows += "<td>" + value[valueOne][Object.keys(value[valueOne])[0]].length +  "</td>";
+              insertRows += "<td>باگیانی شد</td>";
+              insertRows += "<td>بایگانی شده</td>";
               insertRows += "</tr>";
               //get vendor id
 
@@ -368,49 +367,82 @@ $document->addScriptDeclaration($script);
               insertRows = ''
               Object.keys(value[valueOne]).forEach(function(valueTwo, keyTwo) {
                 let storeId = 'store' + (key + 1) + fastHashParams(randomChar());
-
+                if(keyTwo==0){
+                  // insert header section start
+                  insertRows += "<tr  class='" + orderId +
+                    "  archive none' id='" + storeId + "'" +
+                    "" +
+                    " style='color:white;background-color:#1c53a5'>";
+                    insertRows += "<th class='col'>کد فروشگاه</th>";
+                    insertRows += "<th class='col'>نام فروشگاه</th>";
+                    insertRows += "<th class='col'>تعداد محصول</th>";
+                    insertRows += "<th class='col'>عملیات سفارش</th>";
+                    insertRows += "<th class='col'>قیمت کل</th>";
+                  insertRows += "</tr>";
+                }
+                // insert header section end
+                let prices = value[valueOne][valueTwo];
+                let newPrice = prices.map(function(v,index){
+                  return ((parseFloat(v.order_product_price))+(parseFloat(v.order_product_tax)* parseFloat(v.order_product_price)* parseFloat(v.order_product_quantity)))
+                }).reduce(function(sum,cvalue){
+                  return sum + cvalue;
+                });
                 valueTwoCup = valueTwo.length
                 insertRows += "<tr  class='" + orderId +
                   " orderHeader archive none' id='" + storeId + "'" +
                   "' onclick='toggleStore(" + '"' + storeId + '"' + ")'" +
                   " style='color:white;background-color:#1c53a5'>";
-                insertRows += "<td>" + (keyTwo) +
-                  "</td>";
-                insertRows += "<td>فروشگاه keyTwo</td>";
-                insertRows += "<td>" + (valueTwo.length) +
-                  "</td>";
-                insertRows += "<td>keyOne</td>";
-                insertRows += "<td>four</td>";
+                insertRows += "<td>" + valueTwo + "</td>";
+                insertRows += "<td>"+ value[valueOne][valueTwo][0]['ShopName'] +"</td>";
+                insertRows += "<td>" + value[valueOne][valueTwo].length +  "</td>";
+                if (valueOne == 'done') {
+                  insertRows+= "<td>انجام شده</td>";
+                } else if (value[valueOne][valueTwo][0]['proposal_completed'] == -1) {
+                  insertRows+= "<td>رد شد</td>";
+                } else if (valueOne == 'proposal') {
+                  insertRows += '<td>';
+                  insertRows += "<button type='button' class='acceptOrder btn btn-success btn-sm'  onclick='setAcceptOrder(this,event," + (value[valueOne][valueTwo][0]['order_id']) + "," + valueTwo + ")'>قبول</button>";
+                  insertRows += "<button type='button' class='rejectOrder btn btn-danger btn-sm'  onclick='setRejectOrder(this,event," + (value[valueOne][valueTwo][0]['order_id']) + "," + valueTwo + ")'>رد</button>";
+                  insertRows += '</td>';
+                } else {
+                  insertRows += "<td>خطا</td>";
+                }
+                // insertRows += "<td>keyOne</td>";//must be show with some condition
+                insertRows += "<td>"+newPrice+"</td>";
                 insertRows += "</tr>";
                 //show one product order
                 appendArchivedOrders(insertRows);
                 insertRows = ''
-                Object.keys(value[valueOne]).forEach(function(valueThree, keyThree) {
 
-                  value[valueOne][valueThree].forEach(function(data, index) {
+                  value[valueOne][valueTwo].forEach(function(data, index) {
+                    if(index ==0){
+                      insertRows += "<tr  class='" + storeId +
+                      "  archive none' id='product" + data.product_id +
+                      "' style='color:white;background-color:#554884 !important'>";
+                      insertRows += "<th scope='col'>کد محصول</th>";
+                      insertRows += "<th scope='col'>نام محصول</th>";
+                      insertRows += "<th scope='col'>تعداد محصول</th>";
+                      insertRows += "<th scope='col'>قیمت محصول</th>";
+                      insertRows += "<th scope='col'>تخفیف</th>";
+                      insertRows += "</tr>";
 
+                    }
                     insertRows += "<tr  class='" + storeId +
                       " orderHeader archive none' id='product" + data.product_id +
                       "' style='color:white;background-color:#554884 !important'>";
-                    insertRows += "<td>" + data.id +
-                      "</td>";
-                    insertRows += "<td>" + data.order_product_name +
-                      "</td>";
-                    insertRows += "<td>" + data.order_product_quantity +
-                      "</td>";
-                    insertRows += "<td>عملیات سفارش</td>";
-                    insertRows += "<td>باگیانی</td>";
+                    insertRows += "<td>" + data.id + "</td>";
+                    insertRows += "<td>" + data.order_product_name + "</td>";
+                    insertRows += "<td>" + data.order_product_quantity + "</td>";
+                    insertRows += "<td>" + parseFloat(data.order_product_price) + "</td>";
+                    insertRows += "<td>" + parseFloat(data.order_product_tax) + "</td>";
                     insertRows += "</tr>";
                     appendArchivedOrders(insertRows);
                     insertRows = ''
                   })
-                })
               })
             })
           })
         } else {
-          console.log('no')
-          console.log(data)
         }
       },
       error: function(xhr) {
@@ -468,15 +500,43 @@ $document->addScriptDeclaration($script);
       dataType: "json",
       contentType: "application/json",
       success: function(data) {
-        console.log(data)
         if (data[0].response == 'ok') {
           //remove all row before
           jQuery('.orderId' + order_id).remove();
           //get order
 
         } else {
-          console.log('no')
-          console.log(data)
+        }
+      },
+      error: function(xhr) {
+        console.log('error', xhr);
+
+      }
+    })
+  }
+
+  
+  /**set archive order */
+  function setUnArchiveOrder(button, event, order_id,user_id) {
+    var data = {
+      user_id: user_id,
+      type: "unarchiveOrder",
+      order_id: order_id
+    }
+    // sent ajax request
+    jQuery.ajax({
+      url: "http://hypertester.ir/serverHypernetShowUnion/changeConsumerOrderStatus.php",
+      method: "POST",
+      data: JSON.stringify(data),
+      dataType: "json",
+      contentType: "application/json",
+      success: function(data) {
+        if (data[0].response == 'ok') {
+          //remove all row before
+          jQuery(button).parent().remove();
+          //get order
+
+        } else {
         }
       },
       error: function(xhr) {
@@ -502,7 +562,6 @@ $document->addScriptDeclaration($script);
       dataType: "json",
       contentType: "application/json",
       success: function(data) {
-        console.log(data)
         if (data[0].response == 'ok') {
           //remove all row before
           if (data[0].customerSessonId && data[0].storeSessionId) {
@@ -517,7 +576,6 @@ $document->addScriptDeclaration($script);
               "to": '' + data[0].storeSessionId[0].session_id.toString() + '', //error
               "tologged": '' + data[0].customerSessonId.toString() + ''
             };
-            console.log(postObject)
             jQuery.post(jsonLiveSite, postObject, function(response) {
               postObject = null;
 
@@ -537,8 +595,6 @@ $document->addScriptDeclaration($script);
           //get order
 
         } else {
-          console.log('no')
-          console.log(data)
         }
       },
       error: function(xhr) {
@@ -564,7 +620,6 @@ $document->addScriptDeclaration($script);
       dataType: "json",
       contentType: "application/json",
       success: function(data) {
-        console.log(data)
         if (data[0].response == 'ok') {
           //remove all row before
           if (data[0].customerSessonId && data[0].storeSessionId) {
@@ -598,8 +653,6 @@ $document->addScriptDeclaration($script);
           //get order
 
         } else {
-          console.log('no')
-          console.log(data)
         }
       },
       error: function(xhr) {

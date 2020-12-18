@@ -90,6 +90,37 @@ class CustomerOrders
     /**
      *  archive all orders belogs to user where order id is that one she/he want to archive
      */
+    public function setOrdersToUnArchive($user_id, $order_id)
+    {
+        $user_id = $this->getInput($user_id);
+        $order_id = $this->getInput($order_id);
+        $statusComplete = false;
+
+        try {
+            // run your code here
+            $sql = "UPDATE pish_customer_vendor SET pish_customer_vendor.customer_archived = Null WHERE pish_customer_vendor.customer_id = (SELECT pish_hikashop_user.user_id FROM pish_hikashop_user WHERE pish_hikashop_user.user_cms_id=$user_id) AND pish_customer_vendor.order_id = $order_id";
+            $sql = mysqli_real_escape_string($this->conn, $sql);
+            $result = $this->conn->query($sql);
+            if ($result) {
+                $rowcount = mysqli_affected_rows($this->conn);
+                if ($rowcount) {
+                    $statusComplete = true;
+                } else {
+                    $statusComplete = false;
+                }
+            } else {
+                $statusComplete = false;
+            }
+        } catch (exception $e) {
+            //code to handle the exception
+            return false;
+        }
+        return $statusComplete;
+    }
+
+    /**
+     *  archive all orders belogs to user where order id is that one she/he want to archive
+     */
     public function setOrdersToReject($user_id, $order_id, $vendor_id)
     {
         $order_id;
@@ -325,6 +356,12 @@ if ($post && count($post) && $user_id) {
         }
     } elseif ($type == 'archiveOrder') {
         if ($store->setOrdersToArchive($user_id, $order_id)) {
+            $object->response = 'ok';
+        } else {
+            $object->response = 'notok';
+        }
+    } elseif ($type == 'unarchiveOrder') {
+        if ($store->setOrdersToUnArchive($user_id, $order_id)) {
             $object->response = 'ok';
         } else {
             $object->response = 'notok';
