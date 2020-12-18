@@ -28,6 +28,7 @@ class CustomerOrders
      */
     public function getHikashopUserId($user_id)
     {
+        $user_id = $this->getInput($user_id);
         $statusComplete = false;
 
         try {
@@ -61,6 +62,7 @@ class CustomerOrders
 
     public function getStoreOrders($user_id)
     {
+        $user_id = $this->getInput($user_id);
         $statusComplete = false;
 
         try {
@@ -158,64 +160,71 @@ class CustomerOrders
      * get all store orders unArchived
      */
 
-    public function getStoreOrdersArchived($user_id)
+    public function getStoreOrdersArchived($user_id,$start=0)
     {
+        $user_id = $this->getInput($user_id);
+        $start = $this->getInput($start);
         $statusComplete = false;
 
         try {
             // run your code here
-            $sql = "(SELECT NewTable.*,pish_phocamaps_marker_store.ShopName FROM (SELECT
-            pish_customer_vendor.id,
-            pish_customer_vendor.customer_id,
-            pish_customer_vendor.vendor_id,
-            pish_customer_vendor.order_id AS customer_order_id,
-            pish_customer_vendor.buy_status,
-            pish_customer_vendor.archive,
-            pish_customer_vendor.proposal_completed,
-            pish_customer_vendor.order_id AS custome_order_id,
-            pish_hikashop_order_product.*
-          FROM `pish_customer_vendor`
-            INNER JOIN pish_hikashop_order_product ON pish_customer_vendor.order_id = pish_hikashop_order_product.order_id
-            AND pish_customer_vendor.vendor_id = pish_hikashop_order_product.vendor_id_accepted
-          WHERE pish_customer_vendor.buy_status = 'done'
-            AND pish_customer_vendor.customer_archived IS NOT NULL
-            AND pish_customer_vendor.customer_id = (
-              SELECT `user_id`
-              FROM pish_hikashop_user
-              WHERE user_cms_id = $user_id
-              LIMIT 1
-            )) as NewTable
-          
-            INNER JOIN pish_phocamaps_marker_store ON NewTable.vendor_id = pish_phocamaps_marker_store.id
-          )
-          UNION
-          (
-            SELECT NewTable.*,pish_phocamaps_marker_store.ShopName
-          FROM
-          (SELECT  pish_customer_vendor.id 
-                     ,pish_customer_vendor.customer_id 
-                     ,pish_customer_vendor.vendor_id 
-                     ,pish_customer_vendor.order_id AS customer_order_id 
-                     ,pish_customer_vendor.buy_status 
-                     ,pish_customer_vendor.archive 
-                     ,pish_customer_vendor.proposal_completed 
-                     ,pish_customer_vendor.order_id AS custome_order_id 
-                     ,proposal_order_product.*
-              FROM `pish_customer_vendor`
-              INNER JOIN proposal_order_product
-              ON pish_customer_vendor.order_id = proposal_order_product.order_id
-              AND pish_customer_vendor.vendor_id = proposal_order_product.vendor_id_accepted
-              WHERE pish_customer_vendor.buy_status = 'proposal' 
-              AND pish_customer_vendor.customer_archived IS NOT NULL 
-              AND pish_customer_vendor.customer_id = ( 
-              SELECT  `user_id`
-              FROM pish_hikashop_user
-              WHERE user_cms_id=$user_id 
-              LIMIT 1)) AS NewTable
-              INNER JOIN pish_phocamaps_marker_store
-              ON NewTable.vendor_id = pish_phocamaps_marker_store.id
-          
-          )";
+            $sql = "(
+                SELECT NewTable.*,
+                  pish_phocamaps_marker_store.ShopName
+                FROM (
+                  SELECT * FROM
+                    (SELECT pish_customer_vendor.id,
+                      pish_customer_vendor.customer_id,
+                      pish_customer_vendor.vendor_id,
+                      pish_customer_vendor.order_id AS customer_order_id,
+                      pish_customer_vendor.buy_status,
+                      pish_customer_vendor.archive,
+                      pish_customer_vendor.proposal_completed,
+                      pish_customer_vendor.customer_archived,
+                      pish_customer_vendor.order_id AS custome_order_id
+                    FROM `pish_customer_vendor` order by pish_customer_vendor.order_id limit $start,40) AS customer_vendor
+                      INNER JOIN pish_hikashop_order_product ON customer_vendor.customer_order_id = pish_hikashop_order_product.order_id
+                      AND customer_vendor.vendor_id = pish_hikashop_order_product.vendor_id_accepted
+                    WHERE customer_vendor.buy_status = 'done'
+                      AND customer_vendor.customer_archived IS NOT NULL
+                      AND customer_vendor.customer_id = (
+                        SELECT `user_id`
+                        FROM pish_hikashop_user
+                        WHERE user_cms_id = $user_id
+                        LIMIT 1
+                      ) 
+                  ) as NewTable
+                  INNER JOIN pish_phocamaps_marker_store ON NewTable.vendor_id = pish_phocamaps_marker_store.id
+              )
+              UNION
+              (
+                SELECT NewTable.*,
+                  pish_phocamaps_marker_store.ShopName
+                FROM (
+                    SELECT * FROM
+                    (SELECT pish_customer_vendor.id,
+                      pish_customer_vendor.customer_id,
+                      pish_customer_vendor.vendor_id,
+                      pish_customer_vendor.order_id AS customer_order_id,
+                      pish_customer_vendor.buy_status,
+                      pish_customer_vendor.archive,
+                      pish_customer_vendor.proposal_completed,
+                      pish_customer_vendor.order_id AS custome_order_id,
+                      pish_customer_vendor.customer_archived
+                    FROM `pish_customer_vendor` order by pish_customer_vendor.order_id limit $start,40) AS customer_vendor
+                      INNER JOIN proposal_order_product ON customer_vendor.customer_order_id = proposal_order_product.order_id
+                      AND customer_vendor.vendor_id = proposal_order_product.vendor_id_accepted
+                    WHERE customer_vendor.buy_status = 'proposal'
+                      AND customer_vendor.customer_archived IS NOT NULL
+                      AND customer_vendor.customer_id = (
+                        SELECT `user_id`
+                        FROM pish_hikashop_user
+                        WHERE user_cms_id = $user_id
+                        LIMIT 1
+                      )
+                  ) AS NewTable
+                  INNER JOIN pish_phocamaps_marker_store ON NewTable.vendor_id = pish_phocamaps_marker_store.id
+              )";
             // . "AND pish_customer_vendor.customer_id = $this->hikashop_userId";
             $result = $this->conn->query($sql);
             if ($result) {
@@ -267,12 +276,26 @@ class CustomerOrders
     {
         echo json_encode([$object, $data], JSON_UNESCAPED_UNICODE);
     }
+
+    /**
+     * get input and ake sure it secure
+     */
+    private function getInput($input)
+    {
+        $result = htmlspecialchars(strip_tags($input));
+        if (preg_match('/<>;:\$^/', $result)) {
+            return;
+        } else {
+            return $result;
+        }
+    }
 }
 
 //   using class
 $json = file_get_contents('php://input');
 $post = json_decode($json, true);
 $user_id = $post['user_id'];
+$start = $post['start'];
 $type = $post['type'];
 
 $object = new stdClass();
@@ -288,7 +311,7 @@ if ($post && count($post) && $user_id) {
             $object->response = 'fournotok';
         }
     } elseif ($type == 'getAllArchived') {
-        if ($store->getStoreOrdersArchived($user_id)) {
+        if ($store->getStoreOrdersArchived($user_id,$start)) {
             $object->response = 'ok';
             $object->data = $store->allOrders;
         } else {

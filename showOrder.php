@@ -174,7 +174,7 @@ if (!$error) {
                   echo "<td>" . $valueThree['order_product_name'] . "</td>";
                   echo "<td>" . $valueThree['order_product_quantity'] . "</td>";
                   echo "<td> " . $valueThree['order_product_price'] . " </td>";
-                  echo "<td>باگیانی</td>";
+                  echo "<td> " . $valueThree['order_product_tax'] . " </td>";
                   echo "</tr>";
                 }
               }
@@ -230,6 +230,7 @@ $document->addScriptDeclaration($script);
 
 <script>
   var buyStatusGlobal = '';
+  var globalStart=0;
 
   function filterShowOrders(event, button, type) {
     event.preventDefault();
@@ -281,6 +282,7 @@ $document->addScriptDeclaration($script);
   }
   //archvie orders
   function archiveOrders(type) {
+    globalStart=0;
     hideAll()
     //hide all other rows
     // hide('.done')
@@ -324,10 +326,12 @@ $document->addScriptDeclaration($script);
     hide('.archive')
   }
   //get all archive order records
-  function getAllArchiveOrders() {
+  function getAllArchiveOrders(type=null) {
+    
     var data = {
       user_id: <?php echo JFactory::getUser()->id; ?>,
-      type: "getAllArchived"
+      type: "getAllArchived",
+      start:globalStart
     }
     // sent ajax request
     jQuery.ajax({
@@ -338,19 +342,29 @@ $document->addScriptDeclaration($script);
       contentType: "application/json",
       success: function(data) {
         if (data[0].response == 'ok') {
+          globalStart+=40;
+
           //remove all row before
-          jQuery('.archive').remove();
+          if(type ==null){
+            jQuery('.archive').remove();
+          }else if(type =='more'){
+            jQuery('.more').remove();
+          }else{
+
+          }
           //get order
           let insertRows = '';
           let valueTwoCup = 0;
           data[0].data.forEach(function(value, key) {
             var orderId = 'order' + (key + 1) + fastHashParams(randomChar());
+            let status = (Object.keys(value)[0])
+            let vendor_id = ([Object.keys(value[Object.keys(value)[0]])[0]][0])
+
             insertRows += "<tr id='" + orderId +
               "' class='orderHeader archive none" + Object.keys(value)[0] +
               "' onclick='toggleOrder(" + '"' + orderId + '"' + ")'" +
               "style='color:white;background-color:#34568B;'>";
-            insertRows += "<td>" + (key + 1) +
-              "</td>";
+            insertRows += "<td>" + (value[status][vendor_id][0]['order_id']) +"</td>";
             insertRows += "<td>"+Object.keys(value[Object.keys(value)]).length+"</td>";
             
             //get order status
@@ -442,6 +456,11 @@ $document->addScriptDeclaration($script);
               })
             })
           })
+          //add button load more
+          let more =`<div class="row justify-content-center archive more">
+            <button class="btn btn-info" onclick="getAllArchiveOrders('more')">لود کردن بیشتر</button>
+          </div>`;
+          jQuery('#storeOrders').after(more)
         } else {
         }
       },
@@ -722,3 +741,4 @@ $document->addScriptDeclaration($script);
     }
   }
 </script>
+

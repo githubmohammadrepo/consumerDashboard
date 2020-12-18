@@ -474,6 +474,47 @@
                 "proposal": {
                     "128141": [
                         {
+                            "id": "1120",
+                            "customer_id": "800",
+                            "vendor_id": "128141",
+                            "customer_order_id": "1930",
+                            "buy_status": "proposal",
+                            "archive": null,
+                            "proposal_completed": "2",
+                            "custome_order_id": "1930",
+                            "order_product_id": "3612",
+                            "order_id": "1930",
+                            "product_id": "1009",
+                            "order_product_quantity": "1",
+                            "order_product_name": " بیسکویت و ویفر فرمند",
+                            "order_product_code": "product_1009",
+                            "order_product_price": "0.00000",
+                            "order_product_tax": "0.00000",
+                            "order_product_tax_info": "'",
+                            "order_product_options": "",
+                            "order_product_option_parent_id": "0",
+                            "order_product_status": "",
+                            "order_product_wishlist_id": "0",
+                            "order_product_wishlist_product_id": "0",
+                            "order_product_shipping_id": "",
+                            "order_product_shipping_method": "",
+                            "order_product_shipping_price": "0.00000",
+                            "order_product_shipping_tax": "0.00000",
+                            "order_product_shipping_params": "",
+                            "order_product_parent_id": "0",
+                            "order_product_vendor_price": "0.00000",
+                            "order_product_params": "",
+                            "vendor_id_accepted": "128141",
+                            "user_id": "962",
+                            "ShopName": "فروشگاه دارای بازاریاب 11"
+                        }
+                    ]
+                }
+            },
+            {
+                "proposal": {
+                    "128141": [
+                        {
                             "id": "1128",
                             "customer_id": "800",
                             "vendor_id": "128141",
